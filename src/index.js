@@ -11,7 +11,7 @@ const fs = require('fs');
 const path = require('path');
 
 // ============================================
-// CONFIGURACIÓN
+// CONFIGURATION
 // ============================================
 
 const config = new Conf({
@@ -39,7 +39,7 @@ const config = new Conf({
 });
 
 // ============================================
-// CONSTANTES DE EXCLUSIÓN
+// EXCLUSION CONSTANTS
 // ============================================
 
 const DEFAULT_EXCLUDES = [
@@ -58,12 +58,12 @@ const DEFAULT_EXCLUDES = [
 ];
 
 const FIXED_EXCLUDE_PATTERNS = [
-    // Archivos minificados
+    // Minified files
     '*.min.js',
     '*.min.css',
     '*.bundle.js',
     '*.chunk.js',
-    // Directorios de build
+    // Build directories
     'dist/*',
     'build/*',
     '.next/*',
@@ -71,9 +71,9 @@ const FIXED_EXCLUDE_PATTERNS = [
     '.output/*',
     // Source maps
     '*.map',
-    // Archivos generados
+    // Generated files
     '*.generated.*',
-    // Binarios y assets pesados
+    // Binaries and heavy assets
     '*.woff',
     '*.woff2',
     '*.ttf',
@@ -87,24 +87,24 @@ const FIXED_EXCLUDE_PATTERNS = [
 ];
 
 // ============================================
-// TIPOS DE CAMBIO PARA PR
+// PR CHANGE TYPES
 // ============================================
 
 const PR_TYPES = [
-    'feature',    // Nueva funcionalidad
-    'fix',        // Corrección de bug
-    'refactor',   // Refactorización
-    'docs',       // Documentación
+    'feature',    // New feature
+    'fix',        // Bug fix
+    'refactor',   // Refactoring
+    'docs',       // Documentation
     'test',       // Tests
-    'chore',      // Mantenimiento
-    'perf',       // Mejora de rendimiento
-    'style',      // Cambios de estilo/formato
+    'chore',      // Maintenance
+    'perf',       // Performance improvement
+    'style',      // Style/formatting changes
     'ci',         // CI/CD
-    'breaking'    // Cambio que rompe compatibilidad
+    'breaking'    // Breaking change
 ];
 
 // ============================================
-// SCHEMA JSON PARA PR
+// JSON SCHEMA FOR PR
 // ============================================
 
 const PR_SCHEMA = {
@@ -223,7 +223,7 @@ function buildUserPrompt(context) {
         .slice(0, 20)
         .join('\n');
     
-    // Truncado inteligente del diff
+    // Smart diff truncation
     const truncatedDiff = truncateDiffSmart(diff, 8000);
     
     return `BRANCH INFO:
@@ -256,7 +256,7 @@ function truncateDiffSmart(diff, maxLength) {
     let currentLength = 0;
     
     for (const line of lines) {
-        // Priorizar headers de archivo y cambios
+        // Prioritize file headers and changes
         if (line.startsWith('diff --git') || 
             line.startsWith('+++') || 
             line.startsWith('---') ||
@@ -280,7 +280,7 @@ function truncateDiffSmart(diff, maxLength) {
 }
 
 // ============================================
-// GENERACIÓN DE PR
+// PR GENERATION
 // ============================================
 
 async function generatePRDescriptionText(context) {
@@ -290,7 +290,7 @@ async function generatePRDescriptionText(context) {
     const systemPrompt = buildSystemPrompt();
     const userPrompt = buildUserPrompt(context);
     
-    // Usar /api/chat en lugar de /api/generate
+    // Use /api/chat instead of /api/generate
     const response = await fetch(`http://localhost:${port}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -312,29 +312,29 @@ async function generatePRDescriptionText(context) {
     
     if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Error de Ollama: ${errorText}`);
+        throw new Error(`Ollama error: ${errorText}`);
     }
     
     const data = await response.json();
     const rawResponse = data.message?.content || data.response || '';
     
-    // Parsear y validar JSON
+    // Parse and validate JSON
     const prData = parsePRResponse(rawResponse);
     
-    // Formatear a Markdown
+    // Format to Markdown
     return formatPRMarkdown(prData, context);
 }
 
 function parsePRResponse(rawResponse) {
     let jsonStr = rawResponse.trim();
     
-    // Limpiar artefactos
+    // Clean artifacts
     jsonStr = jsonStr.replace(/^```json\s*/i, '');
     jsonStr = jsonStr.replace(/^```\s*/i, '');
     jsonStr = jsonStr.replace(/```\s*$/i, '');
     jsonStr = jsonStr.trim();
     
-    // Extraer JSON si hay texto antes/después
+    // Extract JSON if there's text before/after
     const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
         jsonStr = jsonMatch[0];
@@ -343,12 +343,12 @@ function parsePRResponse(rawResponse) {
     try {
         const parsed = JSON.parse(jsonStr);
         
-        // Validar campos requeridos
+        // Validate required fields
         if (!parsed.title || !parsed.type || !parsed.summary) {
             throw new Error('Missing required fields');
         }
         
-        // Validar tipo
+        // Validate type
         if (!PR_TYPES.includes(parsed.type)) {
             const typeMap = {
                 'feat': 'feature',
@@ -365,7 +365,7 @@ function parsePRResponse(rawResponse) {
             parsed.type = typeMap[parsed.type.toLowerCase()] || 'chore';
         }
         
-        // Asegurar arrays
+        // Ensure arrays
         if (!Array.isArray(parsed.changes)) {
             parsed.changes = parsed.changes ? [parsed.changes] : [];
         }
@@ -376,13 +376,13 @@ function parsePRResponse(rawResponse) {
         return parsed;
         
     } catch (parseError) {
-        console.log(chalk.yellow('\n⚠️  No se pudo parsear JSON, usando fallback...'));
+        console.log(chalk.yellow('\n⚠️  Could not parse JSON, using fallback...'));
         return extractPRFromText(rawResponse);
     }
 }
 
 function extractPRFromText(text) {
-    // Fallback para cuando el modelo no devuelve JSON válido
+    // Fallback for when the model doesn't return valid JSON
     const lines = text.split('\n').filter(l => l.trim());
     
     return {
@@ -478,15 +478,15 @@ function formatPRMarkdown(prData, context) {
 }
 
 // ============================================
-// GESTIÓN DE ARCHIVOS EXCLUIDOS
+// EXCLUDED FILES MANAGEMENT
 // ============================================
 
 function listExcludes() {
     const excludes = config.get('excludeFiles');
-    console.log(chalk.cyan('\n🚫 Archivos excluidos del análisis:\n'));
+    console.log(chalk.cyan('\n🚫 Files excluded from analysis:\n'));
     
     if (excludes.length === 0) {
-        console.log(chalk.yellow('   (ninguno)'));
+        console.log(chalk.yellow('   (none)'));
     } else {
         excludes.forEach((file, index) => {
             const isDefault = DEFAULT_EXCLUDES.includes(file);
@@ -495,7 +495,7 @@ function listExcludes() {
         });
     }
     
-    console.log(chalk.cyan('\n📁 Patrones fijos (siempre excluidos):\n'));
+    console.log(chalk.cyan('\n📁 Fixed patterns (always excluded):\n'));
     FIXED_EXCLUDE_PATTERNS.forEach(pattern => {
         console.log(chalk.gray(`   • ${pattern}`));
     });
@@ -506,13 +506,13 @@ function addExclude(file) {
     const excludes = config.get('excludeFiles');
     
     if (excludes.includes(file)) {
-        console.log(chalk.yellow(`\n⚠️  "${file}" ya está en la lista de exclusión.\n`));
+        console.log(chalk.yellow(`\n⚠️  "${file}" is already in the exclusion list.\n`));
         return;
     }
     
     excludes.push(file);
     config.set('excludeFiles', excludes);
-    console.log(chalk.green(`\n✅ Agregado a exclusiones: ${chalk.yellow(file)}\n`));
+    console.log(chalk.green(`\n✅ Added to exclusions: ${chalk.yellow(file)}\n`));
 }
 
 function removeExclude(file) {
@@ -520,19 +520,19 @@ function removeExclude(file) {
     const index = excludes.indexOf(file);
     
     if (index === -1) {
-        console.log(chalk.yellow(`\n⚠️  "${file}" no está en la lista de exclusión.\n`));
-        console.log(chalk.white('   Usa --list-excludes para ver la lista actual.\n'));
+        console.log(chalk.yellow(`\n⚠️  "${file}" is not in the exclusion list.\n`));
+        console.log(chalk.white('   Use --list-excludes to see the current list.\n'));
         return;
     }
     
     excludes.splice(index, 1);
     config.set('excludeFiles', excludes);
-    console.log(chalk.green(`\n✅ Eliminado de exclusiones: ${chalk.yellow(file)}\n`));
+    console.log(chalk.green(`\n✅ Removed from exclusions: ${chalk.yellow(file)}\n`));
 }
 
 function resetExcludes() {
     config.set('excludeFiles', [...DEFAULT_EXCLUDES]);
-    console.log(chalk.green('\n✅ Lista de exclusiones restablecida a valores por defecto.\n'));
+    console.log(chalk.green('\n✅ Exclusion list reset to defaults.\n'));
 }
 
 function getExcludedFiles() {
@@ -546,28 +546,28 @@ function getAllExcludePatterns() {
 
 function shouldExcludeFile(filename, excludePatterns) {
     return excludePatterns.some(pattern => {
-        // Patrón exacto
+        // Exact pattern
         if (pattern === filename) return true;
         
-        // Patrón con wildcard al inicio (*.min.js)
+        // Pattern with wildcard at start (*.min.js)
         if (pattern.startsWith('*')) {
             const suffix = pattern.slice(1);
             if (filename.endsWith(suffix)) return true;
         }
         
-        // Patrón con wildcard al final (dist/*)
+        // Pattern with wildcard at end (dist/*)
         if (pattern.endsWith('/*')) {
             const prefix = pattern.slice(0, -2);
             if (filename.startsWith(prefix + '/') || filename === prefix) return true;
         }
         
-        // Patrón con wildcard en medio (*.generated.*)
+        // Pattern with wildcard in middle (*.generated.*)
         if (pattern.includes('*')) {
             const regex = new RegExp('^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
             if (regex.test(filename)) return true;
         }
         
-        // Coincidencia por nombre de archivo (sin path)
+        // Match by filename (without path)
         const basename = filename.split('/').pop();
         if (pattern === basename) return true;
         
@@ -582,17 +582,17 @@ function filterDiff(diff, excludePatterns) {
     let excludingCurrentFile = false;
     
     for (const line of lines) {
-        // Detectar inicio de nuevo archivo
+        // Detect start of new file
         if (line.startsWith('diff --git')) {
-            // Extraer nombre del archivo: diff --git a/path/file b/path/file
+            // Extract filename: diff --git a/path/file b/path/file
             const match = line.match(/diff --git a\/(.+) b\/(.+)/);
             if (match) {
-                currentFile = match[2]; // Usar el archivo destino (b/)
+                currentFile = match[2]; // Use destination file (b/)
                 excludingCurrentFile = shouldExcludeFile(currentFile, excludePatterns);
             }
         }
         
-        // Solo incluir líneas si no estamos excluyendo el archivo actual
+        // Only include lines if we're not excluding the current file
         if (!excludingCurrentFile) {
             filteredLines.push(line);
         }
@@ -602,14 +602,14 @@ function filterDiff(diff, excludePatterns) {
 }
 
 // ============================================
-// FUNCIONES GIT
+// GIT FUNCTIONS
 // ============================================
 
 function getCurrentBranch() {
     try {
         return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8' }).trim();
     } catch (error) {
-        throw new Error('No se pudo obtener la rama actual.');
+        throw new Error('Could not get current branch.');
     }
 }
 
@@ -622,7 +622,7 @@ function getRemoteBaseBranch(baseBranch) {
             execSync(`git rev-parse ${baseBranch}`, { stdio: 'pipe' });
             return baseBranch;
         } catch {
-            throw new Error(`No se encontró la rama base '${baseBranch}'. Verifica que exista o usa --base para especificar otra.`);
+            throw new Error(`Base branch '${baseBranch}' not found. Verify it exists or use --base to specify another.`);
         }
     }
 }
@@ -634,7 +634,7 @@ function getBranchDiff(baseBranch) {
         const currentBranch = getCurrentBranch();
         const remoteBranch = getRemoteBaseBranch(baseBranch);
         
-        // Obtener diff sin exclusiones
+        // Get diff without exclusions
         const diffCommand = `git diff ${remoteBranch}...HEAD --no-color`;
         
         let diff = execSync(diffCommand, { 
@@ -646,7 +646,7 @@ function getBranchDiff(baseBranch) {
             return null;
         }
         
-        // Filtrar archivos excluidos programáticamente
+        // Filter excluded files programmatically
         const excludePatterns = getAllExcludePatterns();
         diff = filterDiff(diff, excludePatterns);
         
@@ -662,10 +662,10 @@ function getBranchDiff(baseBranch) {
         
     } catch (error) {
         if (error.message.includes('not a git repository')) {
-            throw new Error('No estás en un repositorio git.');
+            throw new Error('You are not in a git repository.');
         }
         if (error.message.includes('ENOBUFS') || error.message.includes('maxBuffer')) {
-            throw new Error('El diff es demasiado grande. Considera dividir el PR.');
+            throw new Error('The diff is too large. Consider splitting the PR.');
         }
         throw error;
     }
@@ -748,23 +748,23 @@ const program = new Command();
 
 program
     .name('mkpr')
-    .description(chalk.cyan('🚀 CLI para generar descripciones de PR usando Ollama AI'))
+    .description(chalk.cyan('🚀 CLI to generate PR descriptions using Ollama AI'))
     .version('1.0.0');
 
 program
-    .option('--set-model <model>', 'Establecer el modelo de Ollama a usar')
-    .option('--set-port <port>', 'Establecer el puerto de Ollama')
-    .option('--set-base <branch>', 'Establecer la rama base para comparar (default: main)')
-    .option('--set-output <dir>', 'Establecer directorio de salida para los archivos PR')
-    .option('--show-config', 'Mostrar la configuración actual')
-    .option('--list-models', 'Listar modelos disponibles en Ollama')
-    .option('--add-exclude <file>', 'Agregar archivo a la lista de exclusión')
-    .option('--remove-exclude <file>', 'Eliminar archivo de la lista de exclusión')
-    .option('--list-excludes', 'Listar archivos excluidos')
-    .option('--reset-excludes', 'Restablecer lista de exclusión por defecto')
-    .option('-b, --base <branch>', 'Rama base para esta ejecución (sin guardar)')
-    .option('-o, --output <dir>', 'Directorio de salida para esta ejecución (sin guardar)')
-    .option('--dry-run', 'Solo mostrar la descripción sin guardar archivo')
+    .option('--set-model <model>', 'Set the Ollama model to use')
+    .option('--set-port <port>', 'Set the Ollama port')
+    .option('--set-base <branch>', 'Set the base branch for comparison (default: main)')
+    .option('--set-output <dir>', 'Set output directory for PR files')
+    .option('--show-config', 'Show current configuration')
+    .option('--list-models', 'List available models in Ollama')
+    .option('--add-exclude <file>', 'Add file to exclusion list')
+    .option('--remove-exclude <file>', 'Remove file from exclusion list')
+    .option('--list-excludes', 'List excluded files')
+    .option('--reset-excludes', 'Reset exclusion list to defaults')
+    .option('-b, --base <branch>', 'Base branch for this run (not saved)')
+    .option('-o, --output <dir>', 'Output directory for this run (not saved)')
+    .option('--dry-run', 'Only show description without saving file')
     .action(async (options) => {
         try {
             if (options.showConfig) {
@@ -800,11 +800,11 @@ program
             if (options.setPort) {
                 const port = parseInt(options.setPort);
                 if (isNaN(port) || port < 1 || port > 65535) {
-                    console.log(chalk.red('❌ Puerto inválido. Debe ser un número entre 1 y 65535.'));
+                    console.log(chalk.red('❌ Invalid port. Must be a number between 1 and 65535.'));
                     process.exit(1);
                 }
                 config.set('ollamaPort', port);
-                console.log(chalk.green(`✅ Puerto establecido a: ${port}`));
+                console.log(chalk.green(`✅ Port set to: ${port}`));
             }
 
             if (options.setModel) {
@@ -813,12 +813,12 @@ program
 
             if (options.setBase) {
                 config.set('baseBranch', options.setBase);
-                console.log(chalk.green(`✅ Rama base establecida a: ${options.setBase}`));
+                console.log(chalk.green(`✅ Base branch set to: ${options.setBase}`));
             }
 
             if (options.setOutput) {
                 config.set('outputDir', options.setOutput);
-                console.log(chalk.green(`✅ Directorio de salida establecido a: ${options.setOutput}`));
+                console.log(chalk.green(`✅ Output directory set to: ${options.setOutput}`));
             }
 
             if (options.setPort || options.setModel || options.setBase || options.setOutput) {
@@ -840,16 +840,16 @@ program
 program.parse();
 
 // ============================================
-// FUNCIONES DE CONFIGURACIÓN
+// CONFIGURATION FUNCTIONS
 // ============================================
 
 function showConfig() {
-    console.log(chalk.cyan('\n📋 Configuración actual:\n'));
-    console.log(chalk.white(`   Puerto Ollama:     ${chalk.yellow(config.get('ollamaPort'))}`));
-    console.log(chalk.white(`   Modelo:            ${chalk.yellow(config.get('ollamaModel'))}`));
-    console.log(chalk.white(`   Rama base:         ${chalk.yellow(config.get('baseBranch'))}`));
-    console.log(chalk.white(`   Directorio salida: ${chalk.yellow(config.get('outputDir'))}`));
-    console.log(chalk.white(`   Archivos excluidos: ${chalk.gray(config.get('excludeFiles').length + ' archivos')}`));
+    console.log(chalk.cyan('\n📋 Current configuration:\n'));
+    console.log(chalk.white(`   Ollama Port:      ${chalk.yellow(config.get('ollamaPort'))}`));
+    console.log(chalk.white(`   Model:            ${chalk.yellow(config.get('ollamaModel'))}`));
+    console.log(chalk.white(`   Base branch:      ${chalk.yellow(config.get('baseBranch'))}`));
+    console.log(chalk.white(`   Output directory: ${chalk.yellow(config.get('outputDir'))}`));
+    console.log(chalk.white(`   Excluded files:   ${chalk.gray(config.get('excludeFiles').length + ' files')}`));
     console.log();
 }
 
@@ -858,7 +858,7 @@ async function getAvailableModels() {
     const response = await fetch(`http://localhost:${port}/api/tags`);
     
     if (!response.ok) {
-        throw new Error(`No se pudo conectar a Ollama en el puerto ${port}`);
+        throw new Error(`Could not connect to Ollama on port ${port}`);
     }
     
     const data = await response.json();
@@ -866,31 +866,31 @@ async function getAvailableModels() {
 }
 
 async function listModels() {
-    const spinner = ora('Obteniendo lista de modelos...').start();
+    const spinner = ora('Getting model list...').start();
     
     try {
         const models = await getAvailableModels();
         spinner.stop();
         
         if (models.length === 0) {
-            console.log(chalk.yellow('\n⚠️  No hay modelos instalados en Ollama.'));
-            console.log(chalk.white('   Ejecuta: ollama pull <modelo> para descargar uno.\n'));
+            console.log(chalk.yellow('\n⚠️  No models installed in Ollama.'));
+            console.log(chalk.white('   Run: ollama pull <model> to download one.\n'));
             return;
         }
         
-        console.log(chalk.cyan('\n📦 Modelos disponibles en Ollama:\n'));
+        console.log(chalk.cyan('\n📦 Available models in Ollama:\n'));
         models.forEach((model, index) => {
             const name = model.name || model.model;
             const size = model.size ? formatSize(model.size) : 'N/A';
-            const current = name === config.get('ollamaModel') ? chalk.green(' ← actual') : '';
+            const current = name === config.get('ollamaModel') ? chalk.green(' ← current') : '';
             console.log(chalk.white(`   ${index + 1}. ${chalk.yellow(name)} ${chalk.gray(`(${size})`)}${current}`));
         });
         console.log();
         
     } catch (error) {
-        spinner.fail('Error al conectar con Ollama');
+        spinner.fail('Error connecting to Ollama');
         console.log(chalk.red(`\n❌ ${error.message}`));
-        console.log(chalk.white('   Asegúrate de que Ollama esté corriendo.\n'));
+        console.log(chalk.white('   Make sure Ollama is running.\n'));
     }
 }
 
@@ -902,7 +902,7 @@ function formatSize(bytes) {
 }
 
 async function setModel(modelName) {
-    const spinner = ora('Verificando modelo...').start();
+    const spinner = ora('Verifying model...').start();
     
     try {
         const models = await getAvailableModels();
@@ -913,14 +913,14 @@ async function setModel(modelName) {
         
         if (exactMatch) {
             config.set('ollamaModel', exactMatch);
-            spinner.succeed(`Modelo establecido a: ${chalk.yellow(exactMatch)}`);
+            spinner.succeed(`Model set to: ${chalk.yellow(exactMatch)}`);
         } else if (partialMatch) {
             config.set('ollamaModel', partialMatch);
-            spinner.succeed(`Modelo establecido a: ${chalk.yellow(partialMatch)}`);
+            spinner.succeed(`Model set to: ${chalk.yellow(partialMatch)}`);
         } else {
-            spinner.fail('Modelo no encontrado');
-            console.log(chalk.red(`\n❌ El modelo "${modelName}" no está disponible.\n`));
-            console.log(chalk.cyan('📦 Modelos disponibles:'));
+            spinner.fail('Model not found');
+            console.log(chalk.red(`\n❌ Model "${modelName}" is not available.\n`));
+            console.log(chalk.cyan('📦 Available models:'));
             modelNames.forEach(name => {
                 console.log(chalk.white(`   • ${chalk.yellow(name)}`));
             });
@@ -929,21 +929,21 @@ async function setModel(modelName) {
         }
         
     } catch (error) {
-        spinner.fail('Error al verificar modelo');
+        spinner.fail('Error verifying model');
         console.log(chalk.red(`\n❌ ${error.message}`));
         process.exit(1);
     }
 }
 
 async function changeModelInteractive() {
-    const spinner = ora('Obteniendo modelos disponibles...').start();
+    const spinner = ora('Getting available models...').start();
     
     try {
         const models = await getAvailableModels();
         spinner.stop();
         
         if (models.length === 0) {
-            console.log(chalk.yellow('\n⚠️  No hay modelos instalados en Ollama.\n'));
+            console.log(chalk.yellow('\n⚠️  No models installed in Ollama.\n'));
             return;
         }
         
@@ -953,7 +953,7 @@ async function changeModelInteractive() {
             const size = model.size ? formatSize(model.size) : '';
             const isCurrent = name === currentModel;
             return {
-                name: `${name} ${chalk.gray(size)}${isCurrent ? chalk.green(' ← actual') : ''}`,
+                name: `${name} ${chalk.gray(size)}${isCurrent ? chalk.green(' ← current') : ''}`,
                 value: name,
                 short: name
             };
@@ -963,43 +963,43 @@ async function changeModelInteractive() {
             {
                 type: 'list',
                 name: 'selectedModel',
-                message: 'Selecciona el modelo:',
+                message: 'Select the model:',
                 choices,
                 default: currentModel
             }
         ]);
         
         config.set('ollamaModel', selectedModel);
-        console.log(chalk.green(`\n✅ Modelo cambiado a: ${chalk.yellow(selectedModel)}`));
+        console.log(chalk.green(`\n✅ Model changed to: ${chalk.yellow(selectedModel)}`));
         
     } catch (error) {
-        spinner.fail('Error al obtener modelos');
+        spinner.fail('Error getting models');
         console.log(chalk.red(`\n❌ ${error.message}`));
-        console.log(chalk.white('   Asegúrate de que Ollama esté corriendo.\n'));
+        console.log(chalk.white('   Make sure Ollama is running.\n'));
     }
 }
 
 // ============================================
-// FLUJO PRINCIPAL
+// MAIN FLOW
 // ============================================
 
 async function generatePRDescription(baseBranch, outputDir, dryRun) {
-    console.log(chalk.cyan('\n🔍 Analizando diferencias con la rama base...\n'));
+    console.log(chalk.cyan('\n🔍 Analyzing differences with base branch...\n'));
     
-    // Fetch para asegurar que tenemos la última versión
-    const fetchSpinner = ora('Obteniendo últimos cambios de origin...').start();
+    // Fetch to ensure we have the latest version
+    const fetchSpinner = ora('Getting latest changes from origin...').start();
     try {
         execSync('git fetch origin', { stdio: 'pipe' });
-        fetchSpinner.succeed('Repositorio actualizado');
+        fetchSpinner.succeed('Repository updated');
     } catch {
-        fetchSpinner.warn('No se pudo hacer fetch (continuando con datos locales)');
+        fetchSpinner.warn('Could not fetch (continuing with local data)');
     }
     
     const diffData = getBranchDiff(baseBranch);
     
     if (!diffData) {
-        console.log(chalk.yellow('⚠️  No hay diferencias con la rama base.'));
-        console.log(chalk.white(`   Tu rama está al día con ${baseBranch}.\n`));
+        console.log(chalk.yellow('⚠️  No differences with base branch.'));
+        console.log(chalk.white(`   Your branch is up to date with ${baseBranch}.\n`));
         process.exit(0);
     }
     
@@ -1007,35 +1007,35 @@ async function generatePRDescription(baseBranch, outputDir, dryRun) {
     const changedFiles = getChangedFiles(baseBranch);
     const stats = getFilesStats(baseBranch);
     
-    // Filtrar archivos excluidos para mostrar
+    // Filter excluded files for display
     const includedFiles = changedFiles.filter(f => !f.excluded);
     const excludedFiles = changedFiles.filter(f => f.excluded);
     
-    console.log(chalk.white(`📌 Rama actual: ${chalk.yellow(diffData.currentBranch)}`));
-    console.log(chalk.white(`📌 Rama base:   ${chalk.yellow(diffData.baseBranch)}`));
-    console.log(chalk.white(`📝 Commits:     ${chalk.yellow(commits.length)}`));
-    console.log(chalk.white(`📁 Archivos:    ${chalk.yellow(includedFiles.length)} ${excludedFiles.length > 0 ? chalk.gray(`(${excludedFiles.length} excluidos)`) : ''}`));
+    console.log(chalk.white(`📌 Current branch: ${chalk.yellow(diffData.currentBranch)}`));
+    console.log(chalk.white(`📌 Base branch:    ${chalk.yellow(diffData.baseBranch)}`));
+    console.log(chalk.white(`📝 Commits:        ${chalk.yellow(commits.length)}`));
+    console.log(chalk.white(`📁 Files:          ${chalk.yellow(includedFiles.length)} ${excludedFiles.length > 0 ? chalk.gray(`(${excludedFiles.length} excluded)`) : ''}`));
     console.log();
     
-    // Mostrar archivos cambiados
-    console.log(chalk.white('📁 Archivos modificados:'));
+    // Show changed files
+    console.log(chalk.white('📁 Modified files:'));
     includedFiles.slice(0, 10).forEach(f => {
         const statusColor = f.status === 'added' ? chalk.green : 
                            f.status === 'deleted' ? chalk.red : chalk.yellow;
         console.log(chalk.gray(`   ${statusColor(`[${f.statusCode}]`)} ${f.file}`));
     });
     if (includedFiles.length > 10) {
-        console.log(chalk.gray(`   ... y ${includedFiles.length - 10} archivos más`));
+        console.log(chalk.gray(`   ... and ${includedFiles.length - 10} more files`));
     }
     
-    // Mostrar archivos excluidos
+    // Show excluded files
     if (excludedFiles.length > 0) {
-        console.log(chalk.gray(`\n🚫 Excluidos del análisis (${excludedFiles.length}):`));
+        console.log(chalk.gray(`\n🚫 Excluded from analysis (${excludedFiles.length}):`));
         excludedFiles.slice(0, 5).forEach(f => {
             console.log(chalk.gray(`   • ${f.file}`));
         });
         if (excludedFiles.length > 5) {
-            console.log(chalk.gray(`   ... y ${excludedFiles.length - 5} más`));
+            console.log(chalk.gray(`   ... and ${excludedFiles.length - 5} more`));
         }
     }
     console.log();
@@ -1053,46 +1053,46 @@ async function generatePRDescription(baseBranch, outputDir, dryRun) {
     
     while (continueLoop) {
         const spinner = ora({
-            text: `Generando descripción con ${chalk.yellow(config.get('ollamaModel'))}...`,
+            text: `Generating description with ${chalk.yellow(config.get('ollamaModel'))}...`,
             spinner: 'dots'
         }).start();
         
         let prDescription;
         try {
             prDescription = await generatePRDescriptionText(context);
-            spinner.succeed('Descripción generada');
+            spinner.succeed('Description generated');
         } catch (error) {
-            spinner.fail('Error al generar descripción');
+            spinner.fail('Error generating description');
             console.log(chalk.red(`\n❌ ${error.message}`));
-            console.log(chalk.white('   Verifica que Ollama esté corriendo y el modelo disponible.\n'));
+            console.log(chalk.white('   Verify that Ollama is running and the model is available.\n'));
             process.exit(1);
         }
         
-        console.log(chalk.cyan('\n📝 Descripción del PR propuesta:\n'));
+        console.log(chalk.cyan('\n📝 Proposed PR description:\n'));
         console.log(chalk.gray('─'.repeat(60)));
         console.log(prDescription);
         console.log(chalk.gray('─'.repeat(60)));
         console.log();
         
         const choices = [
-            { name: chalk.green('✅ Aceptar y guardar archivo'), value: 'accept' },
-            { name: chalk.yellow('🔄 Generar otra descripción'), value: 'regenerate' },
-            { name: chalk.blue('✏️  Editar título manualmente'), value: 'edit' },
+            { name: chalk.green('✅ Accept and save file'), value: 'accept' },
+            { name: chalk.yellow('🔄 Generate another description'), value: 'regenerate' },
+            { name: chalk.blue('✏️  Edit title manually'), value: 'edit' },
             new inquirer.Separator(),
-            { name: chalk.magenta('🤖 Cambiar modelo'), value: 'change-model' },
+            { name: chalk.magenta('🤖 Change model'), value: 'change-model' },
             new inquirer.Separator(),
-            { name: chalk.red('❌ Cancelar'), value: 'cancel' }
+            { name: chalk.red('❌ Cancel'), value: 'cancel' }
         ];
         
         if (dryRun) {
-            choices[0] = { name: chalk.green('✅ Aceptar (dry-run, no se guardará)'), value: 'accept' };
+            choices[0] = { name: chalk.green('✅ Accept (dry-run, will not save)'), value: 'accept' };
         }
         
         const { action } = await inquirer.prompt([
             {
                 type: 'list',
                 name: 'action',
-                message: '¿Qué deseas hacer?',
+                message: 'What would you like to do?',
                 choices
             }
         ]);
@@ -1100,15 +1100,15 @@ async function generatePRDescription(baseBranch, outputDir, dryRun) {
         switch (action) {
             case 'accept':
                 if (dryRun) {
-                    console.log(chalk.yellow('\n🏃 Dry-run: descripción NO guardada.\n'));
+                    console.log(chalk.yellow('\n🏃 Dry-run: description NOT saved.\n'));
                 } else {
-                    const saveSpinner = ora('Guardando archivo...').start();
+                    const saveSpinner = ora('Saving file...').start();
                     try {
                         const filePath = savePRDescription(prDescription, diffData.currentBranch, outputDir);
-                        saveSpinner.succeed(`Archivo guardado: ${chalk.green(filePath)}`);
-                        console.log(chalk.cyan('\n💡 Tip: Puedes copiar el contenido del archivo para tu PR.\n'));
+                        saveSpinner.succeed(`File saved: ${chalk.green(filePath)}`);
+                        console.log(chalk.cyan('\n💡 Tip: You can copy the file content for your PR.\n'));
                     } catch (error) {
-                        saveSpinner.fail('Error al guardar archivo');
+                        saveSpinner.fail('Error saving file');
                         console.log(chalk.red(`\n❌ ${error.message}\n`));
                     }
                 }
@@ -1116,7 +1116,7 @@ async function generatePRDescription(baseBranch, outputDir, dryRun) {
                 break;
                 
             case 'regenerate':
-                console.log(chalk.cyan('\n🔄 Generando nueva descripción...\n'));
+                console.log(chalk.cyan('\n🔄 Generating new description...\n'));
                 break;
                 
             case 'edit':
@@ -1124,36 +1124,36 @@ async function generatePRDescription(baseBranch, outputDir, dryRun) {
                     {
                         type: 'input',
                         name: 'editedTitle',
-                        message: 'Edita el título del PR:',
+                        message: 'Edit the PR title:',
                         default: diffData.currentBranch.replace(/[-_]/g, ' ')
                     }
                 ]);
                 
-                // Reemplazar título en el markdown
+                // Replace title in markdown
                 const finalDescription = prDescription.replace(/^# .+$/m, `# ${editedTitle}`);
                 
                 if (!dryRun) {
-                    const editSaveSpinner = ora('Guardando archivo...').start();
+                    const editSaveSpinner = ora('Saving file...').start();
                     try {
                         const filePath = savePRDescription(finalDescription, diffData.currentBranch, outputDir);
-                        editSaveSpinner.succeed(`Archivo guardado: ${chalk.green(filePath)}`);
+                        editSaveSpinner.succeed(`File saved: ${chalk.green(filePath)}`);
                     } catch (error) {
-                        editSaveSpinner.fail('Error al guardar archivo');
+                        editSaveSpinner.fail('Error saving file');
                         console.log(chalk.red(`\n❌ ${error.message}\n`));
                     }
                 } else {
-                    console.log(chalk.yellow('\n🏃 Dry-run: descripción NO guardada.\n'));
+                    console.log(chalk.yellow('\n🏃 Dry-run: description NOT saved.\n'));
                 }
                 continueLoop = false;
                 break;
                 
             case 'change-model':
                 await changeModelInteractive();
-                console.log(chalk.cyan('\n🔄 Regenerando descripción con nuevo modelo...\n'));
+                console.log(chalk.cyan('\n🔄 Regenerating description with new model...\n'));
                 break;
                 
             case 'cancel':
-                console.log(chalk.yellow('\n👋 Operación cancelada.\n'));
+                console.log(chalk.yellow('\n👋 Operation cancelled.\n'));
                 continueLoop = false;
                 break;
         }

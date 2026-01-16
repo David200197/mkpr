@@ -8,188 +8,188 @@
   </picture>
 </p>
 
-CLI para generar descripciones de Pull Request automáticamente usando **Ollama** con IA local.
+CLI to automatically generate Pull Request descriptions using **Ollama** with local AI.
 
-## Características
+## Features
 
-- ✨ Genera descripciones de PR completas y profesionales
-- 🔍 Compara tu rama actual contra la rama base (origin/main por defecto)
-- 📝 Guarda la descripción en un archivo `{branch_name}_pr.md`
-- 🤖 Usa modelos de IA locales a través de **Ollama**
-- 🎨 Interfaz interactiva con colores y spinners
-- ⚙️ Configuración persistente
+- ✨ Generates complete and professional PR descriptions
+- 🔍 Compares your current branch against the base branch (origin/main by default)
+- 📝 Saves the description to a `{branch_name}_pr.md` file
+- 🤖 Uses local AI models through **Ollama**
+- 🎨 Interactive interface with colors and spinners
+- ⚙️ Persistent configuration
 
-## Instalación
+## Installation
 
-### Desde el directorio del proyecto:
+### From the project directory:
 
 ```bash
 npm install -g .
 ```
 
-### O ejecutar sin instalar:
+### Or run without installing:
 
 ```bash
 node src/index.js
 ```
 
-## Requisitos
+## Requirements
 
 - **Node.js** >= 14.0.0
-- **Ollama** corriendo localmente
-- Un modelo instalado en Ollama (ej: `ollama pull llama3.2`)
-- Estar en un repositorio git con una rama diferente a la base
+- **Ollama** running locally
+- A model installed in Ollama (e.g.: `ollama pull llama3.2`)
+- Be in a git repository with a branch different from base
 
-## Uso
+## Usage
 
-### Generar descripción de PR
+### Generate PR description
 
 ```bash
-# Estando en tu feature branch
+# While on your feature branch
 mkpr
 ```
 
-### Opciones de ejecución
+### Execution options
 
 ```bash
-# Comparar contra una rama base diferente (solo esta ejecución)
+# Compare against a different base branch (this run only)
 mkpr -b develop
 
-# Guardar en un directorio específico (solo esta ejecución)
+# Save to a specific directory (this run only)
 mkpr -o ./docs/prs
 
-# Solo ver la descripción sin guardar archivo
+# Only view the description without saving file
 mkpr --dry-run
 
-# Combinar opciones
+# Combine options
 mkpr -b develop -o ./prs --dry-run
 ```
 
-### Configuración persistente
+### Persistent configuration
 
 ```bash
-# Ver configuración actual
+# View current configuration
 mkpr --show-config
 
-# Cambiar el modelo de Ollama
+# Change Ollama model
 mkpr --set-model llama3.1
 
-# Cambiar el puerto de Ollama
+# Change Ollama port
 mkpr --set-port 11434
 
-# Cambiar la rama base por defecto
+# Change default base branch
 mkpr --set-base develop
 
-# Cambiar el directorio de salida por defecto
+# Change default output directory
 mkpr --set-output ./docs/prs
 
-# Listar modelos disponibles
+# List available models
 mkpr --list-models
 
-# Ver ayuda
+# View help
 mkpr --help
 ```
 
-## Flujo de trabajo
+## Workflow
 
-1. Creas tu feature branch: `git checkout -b feature/nueva-funcionalidad`
-2. Haces tus commits normalmente
-3. Cuando estés listo para el PR, ejecutas: `mkpr`
-4. El CLI:
-   - Hace `git fetch origin` para actualizar
-   - Compara tu rama contra `origin/main` (o la rama configurada)
-   - Obtiene todos los commits, archivos cambiados y el diff
-   - Genera una descripción usando IA
-5. Puedes:
-   - ✅ **Aceptar** y guardar el archivo
-   - 🔄 **Regenerar** otra descripción
-   - ✏️ **Editar** el título manualmente
-   - ❌ **Cancelar** la operación
+1. Create your feature branch: `git checkout -b feature/new-functionality`
+2. Make your commits as usual
+3. When ready for the PR, run: `mkpr`
+4. The CLI:
+   - Runs `git fetch origin` to update
+   - Compares your branch against `origin/main` (or configured branch)
+   - Gets all commits, changed files, and the diff
+   - Generates a description using AI
+5. You can:
+   - ✅ **Accept** and save the file
+   - 🔄 **Regenerate** another description
+   - ✏️ **Edit** the title manually
+   - ❌ **Cancel** the operation
 
-## Ejemplo de salida
+## Output example
 
-El archivo generado `feature_nueva-funcionalidad_pr.md` contendrá:
+The generated file `feature_new-functionality_pr.md` will contain:
 
 ```markdown
-## Descripción
-Este PR implementa la nueva funcionalidad de...
+## Description
+This PR implements the new functionality of...
 
-## Cambios realizados
-- Añadido nuevo componente X
-- Modificado servicio Y para soportar Z
-- Actualizada documentación
+## Changes made
+- Added new component X
+- Modified service Y to support Z
+- Updated documentation
 
-## Tipo de cambio
+## Change type
 feature
 
 ## Checklist
-- [ ] El código sigue los estándares del proyecto
-- [ ] Se han añadido tests (si aplica)
-- [ ] La documentación ha sido actualizada (si aplica)
+- [ ] Code follows project standards
+- [ ] Tests have been added (if applicable)
+- [ ] Documentation has been updated (if applicable)
 ```
 
-## Ejemplo de uso
+## Usage example
 
 ```
 $ mkpr
 
-🔍 Analizando diferencias con la rama base...
+🔍 Analyzing differences with base branch...
 
-✔ Repositorio actualizado
-📌 Rama actual: feature/add-user-auth
-📌 Rama base:   origin/main
-📝 Commits:     5
-📁 Archivos:    12
+✔ Repository updated
+📌 Current branch: feature/add-user-auth
+📌 Base branch:    origin/main
+📝 Commits:        5
+📁 Files:          12
 
-📁 Archivos modificados:
+📁 Modified files:
    [A] src/auth/AuthService.js
    [A] src/auth/AuthController.js
    [M] src/routes/index.js
    [M] package.json
-   ... y 8 archivos más
+   ... and 8 more files
 
-- Generando descripción con llama3.2...
-✔ Descripción generada
+- Generating description with llama3.2...
+✔ Description generated
 
-📝 Descripción del PR propuesta:
+📝 Proposed PR description:
 ────────────────────────────────────────────────────────────
-## Descripción
-Este PR implementa el sistema de autenticación de usuarios...
+## Description
+This PR implements the user authentication system...
 
-## Cambios realizados
-- Nuevo servicio de autenticación con JWT
-- Endpoints de login y registro
-- Middleware de validación de tokens
+## Changes made
+- New authentication service with JWT
+- Login and registration endpoints
+- Token validation middleware
 ...
 ────────────────────────────────────────────────────────────
 
-? ¿Qué deseas hacer? (Use arrow keys)
-❯ ✅ Aceptar y guardar archivo
-  🔄 Generar otra descripción
-  ✏️  Editar título manualmente
-  ❌ Cancelar
+? What would you like to do? (Use arrow keys)
+❯ ✅ Accept and save file
+  🔄 Generate another description
+  ✏️  Edit title manually
+  ❌ Cancel
 
-✔ Archivo guardado: ./feature_add-user-auth_pr.md
+✔ File saved: ./feature_add-user-auth_pr.md
 
-💡 Tip: Puedes copiar el contenido del archivo para tu PR.
+💡 Tip: You can copy the file content for your PR.
 ```
 
-## Configuración por defecto
+## Default configuration
 
-| Opción | Valor por defecto |
-|--------|-------------------|
-| Puerto | `11434` |
-| Modelo | `llama3.2` |
-| Rama base | `main` |
-| Directorio salida | `.` (directorio actual) |
+| Option | Default value |
+|--------|---------------|
+| Port | `11434` |
+| Model | `llama3.2` |
+| Base branch | `main` |
+| Output directory | `.` (current directory) |
 
 ## Tips
 
-- El archivo se guarda con el nombre de la rama, reemplazando caracteres especiales
-- Usa `--dry-run` para previsualizar sin crear archivos
-- Si trabajas con `develop` como rama base, usa `mkpr --set-base develop` una vez
-- Puedes regenerar la descripción tantas veces como quieras antes de aceptar
+- The file is saved with the branch name, replacing special characters
+- Use `--dry-run` to preview without creating files
+- If you work with `develop` as base branch, use `mkpr --set-base develop` once
+- You can regenerate the description as many times as you want before accepting
 
-## Licencia
+## License
 
 MIT
