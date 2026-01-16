@@ -1,6 +1,6 @@
 {
   "name": "mkpr-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI para generar descripciones de PR usando Ollama AI",
   "main": "src/index.js",
   "bin": {
