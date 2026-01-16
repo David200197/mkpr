@@ -730,10 +730,13 @@ function sanitizeBranchName(branchName) {
 function savePRDescription(content, branchName, outputDir) {
     const sanitizedName = sanitizeBranchName(branchName);
     const fileName = `${sanitizedName}_pr.md`;
-    const filePath = path.join(outputDir, fileName);
     
-    if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
+    // Resolver el directorio de salida respecto al directorio de trabajo actual
+    const resolvedOutputDir = path.resolve(process.cwd(), outputDir);
+    const filePath = path.join(resolvedOutputDir, fileName);
+    
+    if (!fs.existsSync(resolvedOutputDir)) {
+        fs.mkdirSync(resolvedOutputDir, { recursive: true });
     }
     
     fs.writeFileSync(filePath, content, 'utf-8');
