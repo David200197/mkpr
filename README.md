@@ -1,4 +1,4 @@
-# mkpr
+# mkpr - Make Pull Request Messages Automatically
 
 <p align="center">
   <picture>
