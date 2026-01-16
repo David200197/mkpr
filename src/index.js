@@ -403,7 +403,7 @@ function formatPRMarkdown(prData, context) {
     
     let md = `# ${title}\n\n`;
     
-    // Badge del tipo
+    // Type badge
     const typeEmoji = {
         'feature': '✨',
         'fix': '🐛',
@@ -417,20 +417,20 @@ function formatPRMarkdown(prData, context) {
         'breaking': '💥'
     };
     
-    md += `**Tipo:** ${typeEmoji[type] || '📦'} \`${type}\`\n\n`;
+    md += `**Type:** ${typeEmoji[type] || '📦'} \`${type}\`\n\n`;
     md += `**Branch:** \`${currentBranch}\` → \`${baseBranch}\`\n\n`;
     
-    // Descripción
-    md += `## Descripción\n\n${summary}\n\n`;
+    // Description
+    md += `## Description\n\n${summary}\n\n`;
     
-    // Cambios
-    md += `## Cambios realizados\n\n`;
+    // Changes
+    md += `## Changes\n\n`;
     if (changes && changes.length > 0) {
         changes.forEach(change => {
             md += `- ${change}\n`;
         });
     } else {
-        md += `- Actualización general del código\n`;
+        md += `- General code update\n`;
     }
     md += '\n';
     
@@ -448,31 +448,31 @@ function formatPRMarkdown(prData, context) {
         md += `## Testing\n\n${testing}\n\n`;
     }
     
-    // Estadísticas
-    md += `## Estadísticas\n\n`;
+    // Stats
+    md += `## Stats\n\n`;
     md += `- **Commits:** ${commits.length}\n`;
-    md += `- **Archivos modificados:** ${changedFiles.length}\n`;
+    md += `- **Files changed:** ${changedFiles.length}\n`;
     
     const added = changedFiles.filter(f => f.status === 'added').length;
     const modified = changedFiles.filter(f => f.status === 'modified').length;
     const deleted = changedFiles.filter(f => f.status === 'deleted').length;
     
-    if (added) md += `- **Archivos agregados:** ${added}\n`;
-    if (modified) md += `- **Archivos modificados:** ${modified}\n`;
-    if (deleted) md += `- **Archivos eliminados:** ${deleted}\n`;
+    if (added) md += `- **Files added:** ${added}\n`;
+    if (modified) md += `- **Files modified:** ${modified}\n`;
+    if (deleted) md += `- **Files deleted:** ${deleted}\n`;
     md += '\n';
     
-    // Notas
+    // Notes
     if (notes) {
-        md += `## Notas adicionales\n\n${notes}\n\n`;
+        md += `## Additional Notes\n\n${notes}\n\n`;
     }
     
     // Checklist
     md += `## Checklist\n\n`;
-    md += `- [ ] El código sigue los estándares del proyecto\n`;
-    md += `- [ ] Se han añadido tests (si aplica)\n`;
-    md += `- [ ] La documentación ha sido actualizada (si aplica)\n`;
-    md += `- [ ] Los cambios han sido probados localmente\n`;
+    md += `- [ ] Code follows project standards\n`;
+    md += `- [ ] Tests have been added (if applicable)\n`;
+    md += `- [ ] Documentation has been updated (if applicable)\n`;
+    md += `- [ ] Changes have been tested locally\n`;
     
     return md;
 }
