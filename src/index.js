@@ -755,7 +755,7 @@ program
     .version('1.0.0');
 
 program
-    .option('--set-model <model>', 'Set the Ollama model to use')
+    .option('--set-model [model]', 'Set the Ollama model to use (interactive if omitted)')
     .option('--set-port <port>', 'Set the Ollama port')
     .option('--set-base <branch>', 'Set the base branch for comparison (default: main)')
     .option('--set-output <dir>', 'Set output directory for PR files')
@@ -810,8 +810,14 @@ program
                 console.log(chalk.green(`✅ Port set to: ${port}`));
             }
 
-            if (options.setModel) {
-                await setModel(options.setModel);
+            if (options.setModel !== undefined) {
+                if (options.setModel === true) {
+                    // --set-model sin valor = modo interactivo
+                    await changeModelInteractive();
+                } else {
+                    // --set-model <valor> = establecer directamente
+                    await setModel(options.setModel);
+                }
             }
 
             if (options.setBase) {
@@ -824,7 +830,7 @@ program
                 console.log(chalk.green(`✅ Output directory set to: ${options.setOutput}`));
             }
 
-            if (options.setPort || options.setModel || options.setBase || options.setOutput) {
+            if (options.setPort || options.setModel !== undefined || options.setBase || options.setOutput) {
                 return;
             }
 
