@@ -1,4 +1,12 @@
-# mkpr 🚀
+# mkpr
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./black-favicon.svg">
+    <source media="(prefers-color-scheme: light)" srcset="./white-favicon.svg">
+    <img src="./black-favicon.svg" alt="mkcommit logo" width="150">
+  </picture>
+</p>
 
 CLI para generar descripciones de Pull Request automáticamente usando **Ollama** con IA local.
 
