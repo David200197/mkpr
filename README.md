@@ -4,7 +4,7 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./black-favicon.svg">
     <source media="(prefers-color-scheme: light)" srcset="./white-favicon.svg">
-    <img src="./black-favicon.svg" alt="mkcommit logo" width="150">
+    <img src="./black-favicon.svg" alt="mkpr logo" width="150">
   </picture>
 </p>
 
@@ -21,16 +21,27 @@ CLI to automatically generate Pull Request descriptions using **Ollama** with lo
 
 ## Installation
 
-### From the project directory:
+### From npm (recommended)
 
 ```bash
+npm install -g mkpr-cli
+```
+
+### From source
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/mkpr-cli.git
+cd mkpr-cli
+
+# Install globally
 npm install -g .
 ```
 
-### Or run without installing:
+### Run without installing
 
 ```bash
-node src/index.js
+npx mkpr-cli
 ```
 
 ## Requirements
@@ -71,7 +82,10 @@ mkpr -b develop -o ./prs --dry-run
 # View current configuration
 mkpr --show-config
 
-# Change Ollama model
+# Change Ollama model (interactive selector)
+mkpr --set-model
+
+# Change Ollama model (direct)
 mkpr --set-model llama3.1
 
 # Change Ollama port
@@ -90,6 +104,22 @@ mkpr --list-models
 mkpr --help
 ```
 
+### File exclusion management
+
+```bash
+# List excluded files
+mkpr --list-excludes
+
+# Add file to exclusion list
+mkpr --add-exclude "*.generated.js"
+
+# Remove file from exclusion list
+mkpr --remove-exclude "package-lock.json"
+
+# Reset exclusion list to defaults
+mkpr --reset-excludes
+```
+
 ## Workflow
 
 1. Create your feature branch: `git checkout -b feature/new-functionality`
@@ -104,6 +134,7 @@ mkpr --help
    - ✅ **Accept** and save the file
    - 🔄 **Regenerate** another description
    - ✏️ **Edit** the title manually
+   - 🤖 **Change model** and regenerate
    - ❌ **Cancel** the operation
 
 ## Output example
@@ -111,21 +142,36 @@ mkpr --help
 The generated file `feature_new-functionality_pr.md` will contain:
 
 ```markdown
+# Add user authentication system
+
+**Type:** ✨ `feature`
+
+**Branch:** `feature/add-user-auth` → `origin/main`
+
 ## Description
-This PR implements the new functionality of...
 
-## Changes made
-- Added new component X
-- Modified service Y to support Z
-- Updated documentation
+This PR implements a complete user authentication system with JWT tokens...
 
-## Change type
-feature
+## Changes
+
+- Add AuthService with JWT token generation
+- Implement login and registration endpoints
+- Create token validation middleware
+- Update route configuration
+
+## Stats
+
+- **Commits:** 5
+- **Files changed:** 12
+- **Files added:** 4
+- **Files modified:** 8
 
 ## Checklist
+
 - [ ] Code follows project standards
 - [ ] Tests have been added (if applicable)
 - [ ] Documentation has been updated (if applicable)
+- [ ] Changes have been tested locally
 ```
 
 ## Usage example
@@ -148,18 +194,12 @@ $ mkpr
    [M] package.json
    ... and 8 more files
 
-- Generating description with llama3.2...
+⠋ Generating description with llama3.2...
 ✔ Description generated
 
 📝 Proposed PR description:
 ────────────────────────────────────────────────────────────
-## Description
-This PR implements the user authentication system...
-
-## Changes made
-- New authentication service with JWT
-- Login and registration endpoints
-- Token validation middleware
+# Add user authentication system
 ...
 ────────────────────────────────────────────────────────────
 
@@ -167,6 +207,9 @@ This PR implements the user authentication system...
 ❯ ✅ Accept and save file
   🔄 Generate another description
   ✏️  Edit title manually
+  ──────────────
+  🤖 Change model
+  ──────────────
   ❌ Cancel
 
 ✔ File saved: ./feature_add-user-auth_pr.md
@@ -183,12 +226,36 @@ This PR implements the user authentication system...
 | Base branch | `main` |
 | Output directory | `.` (current directory) |
 
+## Default excluded files
+
+The following files are excluded from analysis by default:
+
+- `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`
+- `composer.lock`, `Gemfile.lock`, `poetry.lock`
+- `Cargo.lock`, `pubspec.lock`, `packages.lock.json`
+- Minified files (`*.min.js`, `*.min.css`)
+- Build directories (`dist/*`, `build/*`, `.next/*`)
+- Source maps (`*.map`)
+
 ## Tips
 
 - The file is saved with the branch name, replacing special characters
 - Use `--dry-run` to preview without creating files
 - If you work with `develop` as base branch, use `mkpr --set-base develop` once
 - You can regenerate the description as many times as you want before accepting
+- Use `--set-model` without arguments to interactively select a model
+
+## Updating
+
+```bash
+npm update -g mkpr-cli
+```
+
+## Uninstalling
+
+```bash
+npm uninstall -g mkpr-cli
+```
 
 ## License
 
